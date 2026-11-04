@@ -71,11 +71,17 @@ def layout(app):
         top.columnconfigure(column, weight=1)
     controls = ttk.Frame(app.root, padding=(10, 0))
     controls.pack(fill='x')
-    app.zoom = tk.StringVar(value='1')
+    app.zoom = tk.DoubleVar(value=1.0)
+    app.zoom_text = tk.StringVar(value='1.0배')
     ttk.Label(controls, text='디지털 줌 (1~10)').pack(side='left')
-    ttk.Spinbox(controls, from_=1, to=10, increment=.1, width=6,
-                textvariable=app.zoom, command=app.draw).pack(side='left', padx=5)
-    app.zoom.trace_add('write', app.draw)
+    app.zoom_slider = ttk.Scale(controls, from_=1, to=10, orient='horizontal',
+                                variable=app.zoom, length=140)
+    app.zoom_slider.pack(side='left', padx=5)
+    ttk.Label(controls, textvariable=app.zoom_text, width=6).pack(side='left')
+    def update_zoom(*args):
+        app.zoom_text.set(f'{app.zoom.get():.1f}배')
+        app.draw()  # 기존 좌표를 다시 그릴 뿐 API를 요청하지 않는다.
+    app.zoom.trace_add('write', update_zoom)
     app.ratio = ttk.Combobox(controls, values=('4:3', '16:9', '1:1'), state='readonly', width=6)
     app.ratio.set('4:3')
     app.ratio.pack(side='left', padx=5)
